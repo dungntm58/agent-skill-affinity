@@ -28,39 +28,51 @@ Codex, Gemini CLI, GitHub Copilot CLI**, and others.
 
 ## Install
 
-Clone into your agent's skills directory **as a folder named `affinity-scripting`**
-(the skill's `name`), then run setup once:
+This repo is **both** a Claude Code plugin (auto-registers the MCP server) and a
+plain `SKILL.md` skill for other agents.
+
+First, in Affinity: **Settings → enable "MCP Server"** (grant FileSystem /
+Network / Canva-AI as needed) and keep a document open. The server listens on
+`http://localhost:6767/sse`.
+
+### Claude Code (plugin — recommended)
+The plugin's bundled `.mcp.json` registers the `affinity` MCP server for you —
+no manual `claude mcp add`.
+
+```text
+/plugin marketplace add dungntm58/agent-skill-affinity
+/plugin install affinity-scripting@agent-skill-affinity
+```
+Or, for local development against a clone:
+```bash
+git clone https://github.com/dungntm58/agent-skill-affinity
+claude --plugin-dir ./agent-skill-affinity      # loads the plugin for the session
+```
+On first use the skill runs `preflight.sh`, which checks the MCP server and
+**auto-builds the SDK index** (and auto-rebuilds it after an Affinity upgrade).
+
+### Other agents (skill mode)
+Point your agent at the `skills/affinity-scripting/` subdirectory of a clone
+(symlink it into the agent's skills dir as `affinity-scripting`), then run setup:
 
 ```bash
-# Claude Code
-git clone https://github.com/dungntm58/agent-skill-affinity ~/.claude/skills/affinity-scripting
-~/.claude/skills/affinity-scripting/setup.sh
-
-# Codex / agents using ~/.agents/skills
-git clone https://github.com/dungntm58/agent-skill-affinity ~/.agents/skills/affinity-scripting
+git clone https://github.com/dungntm58/agent-skill-affinity ~/src/agent-skill-affinity
+ln -s ~/src/agent-skill-affinity/skills/affinity-scripting ~/.agents/skills/affinity-scripting
 ~/.agents/skills/affinity-scripting/setup.sh
 ```
 
 | Agent | Skills directory |
 |-------|------------------|
-| Claude Code | `~/.claude/skills/` |
+| Claude Code | install as plugin (above) |
 | Codex | `~/.agents/skills/` (or `~/.codex/skills/`) |
 | Gemini CLI | per its skills/extensions config |
 | Copilot CLI | auto-discovered from installed plugins |
 
-`setup.sh` copies the SDK from your installed Affinity app, builds the
-signature reference, and (if codegraph is installed) indexes the SDK.
-
-### Connect the Affinity MCP server
-The skill drives Affinity through its MCP server. In Affinity: Settings →
-enable **MCP Server**, grant the permissions you need (FileSystem / Network /
-Canva-AI). Then register it with your agent, e.g. for Claude Code:
-
+In skill mode (no plugin), register the MCP server once yourself:
 ```bash
 claude mcp add -s user --transport sse affinity http://localhost:6767/sse
+# or your agent's equivalent SSE MCP registration
 ```
-
-Other agents: add an SSE MCP server pointing at `http://localhost:6767/sse`.
 
 ## Refresh after an Affinity upgrade
 ```bash

@@ -1,0 +1,11 @@
+{
+  "name": "affinity-scripting",
+  "displayName": "Affinity Scripting",
+  "version": "0.1.0",
+  "description": "Script Affinity Designer/Photo/Publisher v3.2+ through its built-in MCP server and JavaScript SDK. Auto-registers the affinity MCP server and builds a complete local SDK API reference for fast lookups.",
+  "author": { "name": "dungntm58", "url": "https://github.com/dungntm58" },
+  "homepage": "https://github.com/dungntm58/agent-skill-affinity",
+  "repository": "https://github.com/dungntm58/agent-skill-affinity",
+  "license": "MIT",
+  "keywords": ["affinity", "canva", "designer", "photo", "publisher", "mcp", "sdk", "design"]
+}

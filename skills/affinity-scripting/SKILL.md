@@ -7,6 +7,13 @@ description: Use when scripting Affinity Designer, Photo, or Publisher (v3.2+, b
 
 Drive Affinity v3.2+ via the `affinity` MCP server (SSE, `http://localhost:6767/sse`). The app must be open with a document. `execute_script` runs JavaScript against the live app.
 
+## Preflight — run FIRST (once per session)
+Before any Affinity work, run the preflight script from this skill's directory (`$SKILL` = the folder containing this SKILL.md):
+```
+"$SKILL/preflight.sh"
+```
+It verifies the MCP server is reachable and **auto-builds/refreshes the local SDK index** if missing or stale (e.g. after an Affinity upgrade). Fast no-op when current. If it reports the MCP server unreachable, fix that (enable it in Affinity Settings, keep a doc open) before scripting.
+
 ## Hard rules (from preamble)
 - **Read `preamble` once per session** before `execute_script`: `read_sdk_documentation_topic(preamble)`. Server enforces it.
 - **`search_sdk_hints` BEFORE experimenting** — fast global solution pool. **`add_sdk_hint` after** solving by experiment (note: writes to a shared global pool — ask the user first).

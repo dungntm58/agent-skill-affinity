@@ -1,0 +1,14 @@
+{
+  "name": "agent-skill-affinity",
+  "owner": { "name": "dungntm58", "url": "https://github.com/dungntm58" },
+  "metadata": {
+    "description": "Tools for scripting Affinity (Designer/Photo/Publisher) from AI agents via its built-in MCP server and JavaScript SDK."
+  },
+  "plugins": [
+    {
+      "name": "affinity-scripting",
+      "source": "./",
+      "description": "Script Affinity (Designer/Photo/Publisher) via its MCP server + JS SDK. Auto-registers the affinity MCP server and ships a complete local SDK API reference."
+    }
+  ]
+}
