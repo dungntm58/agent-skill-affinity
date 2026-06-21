@@ -6,7 +6,8 @@ and JavaScript SDK. It gives any compatible AI coding agent fast, complete API
 lookups instead of slow trial-and-error against the SDK docs.
 
 Works with any agent that supports the `SKILL.md` standard — **Claude Code,
-Codex, Gemini CLI, GitHub Copilot CLI**, and others.
+Codex, Gemini CLI, GitHub Copilot CLI**, and others. Ships as a **Claude Code
+plugin** for zero manual setup, and as a plain skill everywhere else.
 
 ## What it gives the agent
 - **Verified patterns** for the common operations (create a document, add
@@ -17,6 +18,9 @@ Codex, Gemini CLI, GitHub Copilot CLI**, and others.
 - **A codegraph index** (optional) of the SDK for full source, callers,
   callees, and impact queries.
 - **The doc-file map, hard rules, and gotchas** distilled from the SDK preamble.
+- **Zero manual setup on Claude Code** — the plugin auto-registers the `affinity`
+  MCP server, and a preflight check builds/refreshes the SDK index on first use
+  (and after Affinity upgrades) automatically.
 
 ## Requirements
 - **Affinity v3.2+** installed, with its **MCP server enabled** in
@@ -24,7 +28,7 @@ Codex, Gemini CLI, GitHub Copilot CLI**, and others.
 - Your agent connected to that MCP server (see below).
 - **Node.js** (for the signature parser used at setup).
 - **codegraph** CLI — *optional*, enables source/call-graph queries:
-  `npm i -g @codegraph/cli`.
+  `npm i -g @colbymchenry/codegraph`.
 
 ## Install
 
@@ -75,20 +79,35 @@ claude mcp add -s user --transport sse affinity http://localhost:6767/sse
 ```
 
 ## Refresh after an Affinity upgrade
+`preflight.sh` does this automatically on skill use (rebuilds when the installed
+version no longer matches `sdk/VERSION`). To run it by hand:
 ```bash
-./refresh-sdk.sh           # rebuilds only if the installed version changed
-./refresh-sdk.sh --force   # always rebuild
+skills/affinity-scripting/refresh-sdk.sh           # rebuild only if version changed
+skills/affinity-scripting/refresh-sdk.sh --force   # always rebuild
 ```
 
 ## How it works / what is generated
-`setup.sh` → `refresh-sdk.sh` →
-1. copies `JSLib` from your Affinity app into `sdk/JSLib/`,
+`preflight.sh` (run first by the skill) → `refresh-sdk.sh` →
+1. copies `JSLib` from your Affinity app into `skills/affinity-scripting/sdk/JSLib/`,
 2. runs `extract-api.js` to produce `affinity-sdk-api.md` (deterministic
    signature extraction — complete, no LLM),
 3. optionally builds a codegraph index under `sdk/JSLib/.codegraph/`.
 
 The generated `sdk/` and `affinity-sdk-api.md` are **git-ignored** — they are
 rebuilt locally and never published.
+
+## Repo layout
+```
+.claude-plugin/plugin.json      # Claude Code plugin manifest
+.claude-plugin/marketplace.json # installable via /plugin marketplace add
+.mcp.json                       # auto-registers the affinity MCP server
+skills/affinity-scripting/
+  SKILL.md                      # the skill (works standalone for any agent)
+  preflight.sh                  # MCP check + auto build/refresh of the index
+  setup.sh, refresh-sdk.sh      # build/refresh the local SDK index
+  extract-api.js                # deterministic signature extractor
+  sdk/, affinity-sdk-api.md     # generated locally (git-ignored)
+```
 
 ## Legal
 This repository contains only original skill files and tooling (MIT, see

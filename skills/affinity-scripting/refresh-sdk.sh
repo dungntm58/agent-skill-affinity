@@ -48,7 +48,7 @@ if command -v codegraph >/dev/null; then
   codegraph index "$DST" 2>&1 | tail -3
 else
   echo "    codegraph not installed — skipping graph (reference + raw source still built)."
-  echo "    install: npm i -g @codegraph/cli   (optional; enables callers/callees/source queries)"
+  echo "    install: npm i -g @colbymchenry/codegraph   (optional; enables callers/callees/source queries)"
 fi
 
 echo "==> 3/3 regenerating signature reference"
