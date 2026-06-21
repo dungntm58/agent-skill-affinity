@@ -56,27 +56,61 @@ On first use the skill runs `preflight.sh`, which checks the MCP server and
 **auto-builds the SDK index** (and auto-rebuilds it after an Affinity upgrade).
 
 ### Other agents (skill mode)
-Point your agent at the `skills/affinity-scripting/` subdirectory of a clone
-(symlink it into the agent's skills dir as `affinity-scripting`), then run setup:
+`SKILL.md` is a portable [open standard](https://agentskills.io/specification)
+(Codex, Cursor, Windsurf, Copilot, Gemini, …). Only the auto-MCP `.mcp.json` and
+`.claude-plugin/` are Claude-Code-specific; everywhere else it's **two manual
+steps**: (1) install the skill folder, (2) register the MCP server.
+
+**1. Install the skill** — symlink the `skills/affinity-scripting/` subdir of a
+clone into the agent's skills dir, then run setup once:
 
 ```bash
 git clone https://github.com/dungntm58/agent-skill-affinity ~/src/agent-skill-affinity
-ln -s ~/src/agent-skill-affinity/skills/affinity-scripting ~/.agents/skills/affinity-scripting
-~/.agents/skills/affinity-scripting/setup.sh
+ln -s ~/src/agent-skill-affinity/skills/affinity-scripting <SKILLS_DIR>/affinity-scripting
+<SKILLS_DIR>/affinity-scripting/setup.sh
 ```
 
-| Agent | Skills directory |
-|-------|------------------|
-| Claude Code | install as plugin (above) |
-| Codex | `~/.agents/skills/` (or `~/.codex/skills/`) |
+| Agent | `<SKILLS_DIR>` |
+|-------|----------------|
+| Claude Code | install as plugin (above) — skips both steps |
+| Codex | `~/.codex/skills/` or `~/.agents/skills/` (repo: `.agents/skills/`) |
+| Cursor | `~/.cursor/skills/` (project: `.cursor/skills/`) |
+| Copilot CLI | `~/.copilot/skills/` (repo: `.github/skills/`) |
+| Windsurf | supports SKILL.md — check current Windsurf docs for its skills path |
 | Gemini CLI | per its skills/extensions config |
-| Copilot CLI | auto-discovered from installed plugins |
 
-In skill mode (no plugin), register the MCP server once yourself:
+> Tip: `~/.agents/skills/` is a shared location watched by Claude Code, Codex,
+> and Copilot — symlink there once to cover all three.
+
+**2. Register the Affinity MCP server.** The in-app server uses the **legacy
+SSE transport** at `http://localhost:6767/sse`. Most clients speak it directly;
+Codex is Streamable-HTTP-only and needs an `mcp-proxy` bridge.
+
+*Claude Code* (if used as a bare skill, not the plugin):
 ```bash
 claude mcp add -s user --transport sse affinity http://localhost:6767/sse
-# or your agent's equivalent SSE MCP registration
 ```
+*Cursor* — `~/.cursor/mcp.json`:
+```json
+{ "mcpServers": { "affinity": { "url": "http://localhost:6767/sse" } } }
+```
+*Windsurf* — `~/.codeium/windsurf/mcp_config.json` (note `serverUrl`):
+```json
+{ "mcpServers": { "affinity": { "serverUrl": "http://localhost:6767/sse" } } }
+```
+*Copilot CLI* — `~/.copilot/mcp-config.json`:
+```json
+{ "mcpServers": { "affinity": { "type": "sse", "url": "http://localhost:6767/sse", "tools": ["*"] } } }
+```
+*Codex* — needs a proxy (Streamable-HTTP only). Requires [`mcp-proxy`](https://github.com/sparfenyuk/mcp-proxy) (`uvx`/`pipx`):
+```bash
+codex mcp add affinity -- uvx mcp-proxy --transport sse http://localhost:6767/sse
+```
+
+> The server binds IPv6 (`[::1]`). `localhost` resolves to it on macOS; if a
+> client forces `127.0.0.1` and fails to connect, that's why — use `localhost`.
+> Tool names differ per client (`mcp__affinity__execute_script` in Claude Code,
+> `affinity.execute_script` elsewhere); the skill notes this.
 
 ## Refresh after an Affinity upgrade
 `preflight.sh` does this automatically on skill use (rebuilds when the installed
